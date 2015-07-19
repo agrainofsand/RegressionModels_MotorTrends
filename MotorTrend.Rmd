@@ -1,7 +1,5 @@
----
-output: pdf_document
----
-```{r echo=FALSE, cache=TRUE}
+
+```{r echo=FALSE, include=FALSE}
 ## Loading libraries ##
 library(dplyr)
 library(ggplot2)
@@ -22,57 +20,58 @@ graphs.panelPearson <- function(x,y, ...) {
     text(horizontal, vertical, format(cor(x,y), digits=2)) 
 }
 ```
-##Background
+### Background
 Motor Trend, a magazine about the automobile industry, is interested in exploring the relationship between a set of variables and miles per gallon (MPG) (outcome). They are particularly interested in the following two questions:
-
 1. “Is an automatic or manual transmission better for MPG”
 2. "Quantify the MPG difference between automatic and manual transmissions"
 
-##Executive Summary
-We found that manual transmissions can be said to be better for MPG than automatic transmissions (with a 95% level of confidence).
-
-Car transmission type alone however, is not enough the predict the MPG difference. Other variables that drive (pun intended) MPG include wt (lb/1000) and qsec (1/4 mile time). 
+###Executive Summary
+We found that manual transmissions can be said to be better for MPG than automatic transmissions (with a 95% level of confidence). Car transmission type alone however, is not enough the predict the MPG difference. Other variables that drive (pun intended) MPG include wt (lb/1000) and qsec (1/4 mile time). 
 
 MPG = 9.6178 - 3.9165 * wt + 1.2259 * qsec + 2.9358 * am
 
-##Exploratory Data Analysis
-### Mpg of manual cars is significantly different from the mpg of automatic cars
-As we can see from the following table, manual cars on average have 7.25 higher mpg than automatic cars. The boxplot also bears out this observation.
+###Exploratory Data Analysis
+**Mpg of manual cars is significantly different from the mpg of automatic cars:**
+Manual cars on average have 7.25 higher mpg than automatic cars. The boxplot bears out this observation.
 
-```{r}
-aggregate(mpg~am, data = mtcars, mean)
+```{r echo=FALSE}
+#aggregate(mpg~am, data = mtcars, mean)
 qplot(factor(am), mpg, data = mtcars, geom=c("boxplot", "jitter")) + theme_bw()
 ```
 
 This observation is confirmed through a two-sample t-test, the small p-value of 0.0014 leads us to comfortably reject the null hypothesis with a 95% confidence level.
 ```{r}
-t.test(auto$mpg, manual$mpg)
+t.test(auto$mpg, manual$mpg)$p.value
 ```
 
-### Transmissions of cars alone does not adequately describe the differences in cars' mpg
+**Transmissions of cars alone does not adequately describe the differences in cars' mpg:**
 Transmissions of cars appear to be one predictor of the mpg of a car, as seen from the low p-value of 0.000285. However, we see from the multiple R-squared that this model only explains 36% of the variance.
 ```{r}
 lm.am <- lm(mpg ~ am, data=mtcars)
-summary(lm.am)
+summary(lm.am)$coefficients
+summary(lm.am)$r.squared
 ```
 
-###Besides transmissions, weight and qsec are also good predictors of cars' mpg
+**Besides transmissions, weight and qsec are also good predictors of cars' mpg:**
 After running a stepwise alogrithm to choose the best fit model from the other variables in the mtcars data set, we see that wt and qsec are even stronger predictors of cars' mpg, as evident from their low p-values. Furthermore, we see from the multiple R-squared that this model is able to explain 85% of the variance in mpg.
 
-```{r}
+```{r echo=FALSE}
 step.model <- step(lm(mpg ~ ., data=mtcars), trace=0)
-summary(step.model)
+summary(step.model)$coefficients
+summary(step.model)$r.squared
 ```
 
-##Appendix
-### Scatterplot of mpg against wt, qsec, am
-```{r}
+
+
+###Appendix
+**Scatterplot of mpg against wt, qsec, am**
+```{r echo=FALSE}
   d    <- select(mtcars, mpg, wt, qsec, am)
   pairs(d, upper.panel = graphs.panelPearson)
 ```
 
-### Model residual diagnostics
-```{r}
+**Model residual diagnostics**
+```{r echo=FALSE}
 l <- lm(mpg ~ wt + qsec + am, data=mtcars)
 par(mfrow=c(2,2))
 plot(l)
